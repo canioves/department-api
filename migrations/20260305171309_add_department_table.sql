@@ -9,4 +9,4 @@ CREATE TABLE "departments" (
 );
 
 -- +goose Down
-DROP CASCADE TABLE "departments";
+DROP TABLE "departments" CASCADE;
