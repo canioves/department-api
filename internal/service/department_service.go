@@ -3,6 +3,7 @@ package service
 import (
 	"department-api/internal/models"
 	"department-api/internal/repository"
+	"department-api/internal/validation"
 	"fmt"
 	"strings"
 )
@@ -23,13 +24,11 @@ func (s *departmentService) CreateDepartment(department *models.Department) (*mo
 	if department.ID == *department.ParentID {
 		return nil, fmt.Errorf("Can't create department with id = parent_id")
 	}
-
-	nameLength := len(department.Name)
-	if nameLength > 200 {
-		return nil, fmt.Errorf("Name too long")
+	if ok, err := validation.ValidateMaxLength(department.Name, "name", 200); !ok {
+		return nil, err
 	}
-	if department.Name == "" {
-		return nil, fmt.Errorf("Name cannot be empty")
+	if ok, err := validation.ValidateEmpty(department.Name, "name"); !ok {
+		return nil, err
 	}
 
 	trimmedName := strings.Trim(department.Name, " ")
