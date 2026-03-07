@@ -1,11 +1,11 @@
 -- +goose Up
 CREATE TABLE "employees" (
     "id" bigserial,
-    "full_name" text,
-    "position" text,
+    "full_name" text NOT NULL,
+    "position" text NOT NULL,
     "hired_at" timestamptz,
-    "created_at" timestamptz,
-    "department_id" bigint,
+    "created_at" timestamptz NOT NULL,
+    "department_id" bigint NOT NULL,
     PRIMARY KEY ("id"),
     CONSTRAINT "fk_departments_employees" FOREIGN KEY ("department_id") REFERENCES "departments"("id")
 );

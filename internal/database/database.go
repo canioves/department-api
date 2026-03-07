@@ -11,7 +11,7 @@ import (
 )
 
 func Connect(config *config.Config) *gorm.DB {
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+	connStr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
 		config.DBUser, config.DBPassword, config.DBHost, config.DBPort, config.DBName,
 	)
 

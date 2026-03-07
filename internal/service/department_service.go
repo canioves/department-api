@@ -12,11 +12,11 @@ type DepartmentService interface {
 }
 
 type departmentService struct {
-	repositroy repository.DepartmentRepository
+	repository repository.DepartmentRepository
 }
 
 func NewDepartmentService(repository repository.DepartmentRepository) DepartmentService {
-	return &departmentService{repositroy: repository}
+	return &departmentService{repository: repository}
 }
 
 func (s *departmentService) CreateDepartment(department *models.Department) (*models.Department, error) {
@@ -31,9 +31,10 @@ func (s *departmentService) CreateDepartment(department *models.Department) (*mo
 		return nil, fmt.Errorf("Name cannot be empty")
 	}
 
+	siblings := s.repository.
 	trimmedName := strings.Trim(department.Name, " ")
 	department.Name = trimmedName
 
-	return department, nil
-
+	result, err := s.repository.CreateDepartment(department)
+	return result, err
 }

@@ -10,7 +10,9 @@ import (
 type DepartmentRepository interface {
 	CreateDepartment(department *models.Department) (*models.Department, error)
 	GetAllDepartments() ([]*models.Department, error)
-	GetChildren(parentID int) ([]*models.Department, error)
+	GetChildrenDepartments(parentID *uint) ([]*models.Department, error)
+	GetDepartmentById(id *uint) (*models.Department, error)
+	GetSiblingsDepartments()
 }
 
 type departmentRepository struct {
@@ -38,11 +40,21 @@ func (r *departmentRepository) GetAllDepartments() ([]*models.Department, error)
 	return departments, nil
 }
 
-func (r *departmentRepository) GetChildren(parentID int) ([]*models.Department, error) {
+func (r *departmentRepository) GetChildrenDepartments(parentID *uint) ([]*models.Department, error) {
 	var children []*models.Department
 	result := r.database.Where("parent_id = ?", parentID).Find(&children)
 	if err := result.Error; err != nil {
 		return nil, fmt.Errorf("GetChildren error: %w", err)
 	}
 	return children, nil
+}
+
+func (r *departmentRepository) GetDepartmentById(id *uint) (*models.Department, error) {
+	var department *models.Department
+	result := r.database.Where("id = ?", id).First(&department)
+	if err := result.Error; err != nil {
+		return nil, fmt.Errorf("GetDepartmentById error: %w", err)
+	}
+	return department, nil
+
 }
