@@ -20,10 +20,11 @@ func NewDepartmentService(repository repository.DepartmentRepository) Department
 }
 
 func (s *departmentService) CreateDepartment(department *models.Department) (*models.Department, error) {
-	nameLength := len(department.Name)
-	if nameLength < 1 {
-		return nil, fmt.Errorf("Name too short")
+	if department.ID == *department.ParentID {
+		return nil, fmt.Errorf("Can't create department with id = parent_id")
 	}
+
+	nameLength := len(department.Name)
 	if nameLength > 200 {
 		return nil, fmt.Errorf("Name too long")
 	}
@@ -31,10 +32,20 @@ func (s *departmentService) CreateDepartment(department *models.Department) (*mo
 		return nil, fmt.Errorf("Name cannot be empty")
 	}
 
-	siblings := s.repository.
 	trimmedName := strings.Trim(department.Name, " ")
 	department.Name = trimmedName
+
+	siblings, _ := s.repository.GetSiblingsDepartments(department.ParentID)
+	for _, sibling := range siblings {
+		if sibling.Name == department.Name {
+			return nil, fmt.Errorf("Duplicate name on same level: %s", department.Name)
+		}
+	}
 
 	result, err := s.repository.CreateDepartment(department)
 	return result, err
 }
+
+// func (s *departmentService) GetDepartment(id uint, depth int, includeEmployee bool) ([]*models.Department, error) {
+
+// }

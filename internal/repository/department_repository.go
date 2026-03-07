@@ -12,7 +12,7 @@ type DepartmentRepository interface {
 	GetAllDepartments() ([]*models.Department, error)
 	GetChildrenDepartments(parentID *uint) ([]*models.Department, error)
 	GetDepartmentById(id *uint) (*models.Department, error)
-	GetSiblingsDepartments()
+	GetSiblingsDepartments(id *uint) ([]*models.Department, error)
 }
 
 type departmentRepository struct {
@@ -44,7 +44,7 @@ func (r *departmentRepository) GetChildrenDepartments(parentID *uint) ([]*models
 	var children []*models.Department
 	result := r.database.Where("parent_id = ?", parentID).Find(&children)
 	if err := result.Error; err != nil {
-		return nil, fmt.Errorf("GetChildren error: %w", err)
+		return nil, fmt.Errorf("GetChildrenDepartments error: %w", err)
 	}
 	return children, nil
 }
@@ -56,5 +56,21 @@ func (r *departmentRepository) GetDepartmentById(id *uint) (*models.Department, 
 		return nil, fmt.Errorf("GetDepartmentById error: %w", err)
 	}
 	return department, nil
+}
 
+func (r *departmentRepository) GetSiblingsDepartments(id *uint) ([]*models.Department, error) {
+	var siblings []*models.Department
+	var whereResult *gorm.DB
+
+	if id != nil {
+		whereResult = r.database.Where("parent_id = ?", id)
+	} else {
+		whereResult = r.database.Where("parent_id is null")
+	}
+
+	result := whereResult.Find(&siblings)
+	if err := result.Error; err != nil {
+		return nil, fmt.Errorf("GetSiblingsDepartments %w", err)
+	}
+	return siblings, nil
 }

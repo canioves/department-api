@@ -22,7 +22,7 @@ func Connect(config *config.Config) *gorm.DB {
 	if err != nil {
 		log.Fatalln("Can't connect to database:", err)
 	} else {
-		log.Printf("Succesfully connect to %s!", config.DBName)
+		log.Printf("Succesfully connect to %s!\n", config.DBName)
 	}
 
 	return db
