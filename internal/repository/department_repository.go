@@ -11,7 +11,7 @@ type DepartmentRepository interface {
 	CreateDepartment(department *models.Department) (*models.Department, error)
 	GetAllDepartments() ([]*models.Department, error)
 	GetChildrenDepartments(parentID *uint) ([]*models.Department, error)
-	GetDepartmentById(id *uint) (*models.Department, error)
+	GetDepartmentById(id uint) (*models.Department, error)
 	GetSiblingsDepartments(id *uint) ([]*models.Department, error)
 }
 
@@ -49,7 +49,7 @@ func (r *departmentRepository) GetChildrenDepartments(parentID *uint) ([]*models
 	return children, nil
 }
 
-func (r *departmentRepository) GetDepartmentById(id *uint) (*models.Department, error) {
+func (r *departmentRepository) GetDepartmentById(id uint) (*models.Department, error) {
 	var department *models.Department
 	result := r.database.Where("id = ?", id).First(&department)
 	if err := result.Error; err != nil {

@@ -14,7 +14,7 @@ type employeeService struct {
 	employeeRepository   repository.EmployeeRepository
 }
 
-func NewEmployeeRepository(depRepo repository.DepartmentRepository, emplRepo repository.EmployeeRepository) EmployeeService {
+func NewEmployeeService(depRepo repository.DepartmentRepository, emplRepo repository.EmployeeRepository) EmployeeService {
 	return &employeeService{
 		departmentRepository: depRepo,
 		employeeRepository:   emplRepo,
@@ -22,7 +22,7 @@ func NewEmployeeRepository(depRepo repository.DepartmentRepository, emplRepo rep
 }
 
 func (s *employeeService) CreateEmployee(employee *models.Employee) (*models.Employee, error) {
-	targetDepartment, err := s.departmentRepository.GetDepartmentById(&employee.DepartmentID)
+	targetDepartment, err := s.departmentRepository.GetDepartmentById(employee.DepartmentID)
 	if err != nil {
 		return nil, fmt.Errorf("CreateEmployee service error: %w", err)
 	}
