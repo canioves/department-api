@@ -8,7 +8,7 @@ import (
 )
 
 type DepartmentRepository interface {
-	CreateDepartment(department *models.Department) (*models.Department, error)
+	CreateDepartment(department *models.Department) error
 	GetAllDepartments() ([]*models.Department, error)
 	GetChildrenDepartments(parentID *uint) ([]*models.Department, error)
 	GetDepartmentById(id uint) (*models.Department, error)
@@ -23,12 +23,12 @@ func NewDepartmentRepository(db *gorm.DB) DepartmentRepository {
 	return &departmentRepository{database: db}
 }
 
-func (r *departmentRepository) CreateDepartment(department *models.Department) (*models.Department, error) {
+func (r *departmentRepository) CreateDepartment(department *models.Department) error {
 	result := r.database.Create(department)
 	if err := result.Error; err != nil {
-		return nil, fmt.Errorf("CreateDepartment error: %w", err)
+		return fmt.Errorf("CreateDepartment error: %w", err)
 	}
-	return department, nil
+	return nil
 }
 
 func (r *departmentRepository) GetAllDepartments() ([]*models.Department, error) {

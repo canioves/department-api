@@ -7,6 +7,7 @@ import (
 )
 
 type EmployeeService interface {
+	CreateEmployee(employee *models.Employee, departmentId uint) error
 }
 
 type employeeService struct {
@@ -21,14 +22,16 @@ func NewEmployeeService(depRepo repository.DepartmentRepository, emplRepo reposi
 	}
 }
 
-func (s *employeeService) CreateEmployee(employee *models.Employee) (*models.Employee, error) {
-	targetDepartment, err := s.departmentRepository.GetDepartmentById(employee.DepartmentID)
+func (s *employeeService) CreateEmployee(employee *models.Employee, departmentId uint) error {
+	targetDepartment, err := s.departmentRepository.GetDepartmentById(departmentId)
 	if err != nil {
-		return nil, fmt.Errorf("CreateEmployee service error: %w", err)
+		return fmt.Errorf("CreateEmployee service error: %w", err)
 	}
 	if targetDepartment == nil {
-		return nil, fmt.Errorf("Can't add employee to not existing department")
+		return fmt.Errorf("Can't add employee to not existing department")
 	}
 
-	return employee, nil
+	err = s.employeeRepository.CreateEmployee(employee, departmentId)
+
+	return nil
 }

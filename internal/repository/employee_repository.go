@@ -8,7 +8,7 @@ import (
 )
 
 type EmployeeRepository interface {
-	CreateEmployee(employee *models.Employee, departmentId uint) (*models.Employee, error)
+	CreateEmployee(employee *models.Employee, departmentId uint) error
 	GetEmployeeById(id uint) (*models.Employee, error)
 	GetEmployeesByDepartment(departmentId uint) ([]*models.Employee, error)
 }
@@ -31,13 +31,13 @@ func (r *employeeRepository) GetEmployeeById(id uint) (*models.Employee, error) 
 	return employee, nil
 }
 
-func (r *employeeRepository) CreateEmployee(employee *models.Employee, departmentId uint) (*models.Employee, error) {
+func (r *employeeRepository) CreateEmployee(employee *models.Employee, departmentId uint) error {
 	employee.DepartmentID = departmentId
 	result := r.database.Create(employee)
 	if err := result.Error; err != nil {
-		return nil, fmt.Errorf("CreateEmployee error: %w", err)
+		return fmt.Errorf("CreateEmployee error: %w", err)
 	}
-	return employee, nil
+	return nil
 }
 
 func (r *employeeRepository) GetEmployeesByDepartment(departmentId uint) ([]*models.Employee, error) {

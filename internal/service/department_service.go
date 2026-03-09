@@ -9,7 +9,7 @@ import (
 )
 
 type DepartmentService interface {
-	CreateDepartment(department *models.Department) (*models.Department, error)
+	CreateDepartment(department *models.Department) error
 	GetDepartment(id uint, depth int, includeEmployees bool) (*models.Department, error)
 }
 
@@ -25,37 +25,59 @@ func NewDepartmentService(depRepo repository.DepartmentRepository, emplRepo repo
 	}
 }
 
-func (s *departmentService) CreateDepartment(department *models.Department) (*models.Department, error) {
-	if department.ID == *department.ParentID {
-		return nil, fmt.Errorf("Can't create department with id = parent_id")
-	}
-	if ok, err := validation.ValidateMaxLength(department.Name, "name", 200); !ok {
-		return nil, err
-	}
-	if ok, err := validation.ValidateEmpty(department.Name, "name"); !ok {
-		return nil, err
+func (s *departmentService) CreateDepartment(department *models.Department) error {
+	if department.ParentID != nil {
+		if *department.ParentID == 0 {
+			return fmt.Errorf("Parent ID cannot be 0")
+		}
+
+		parentDepartment, err := s.departmentRepository.GetDepartmentById(*department.ParentID)
+		if parentDepartment == nil {
+			return fmt.Errorf("Parent department is not exist")
+		}
+		if err != nil {
+			return err
+		}
 	}
 
 	trimmedName := strings.Trim(department.Name, " ")
 	department.Name = trimmedName
 
+	if ok, err := validation.ValidateMaxLength(department.Name, "name", 200); !ok {
+		return err
+	}
+	if ok, err := validation.ValidateEmpty(department.Name, "name"); !ok {
+		return err
+	}
+
 	siblings, _ := s.departmentRepository.GetSiblingsDepartments(department.ParentID)
 	for _, sibling := range siblings {
 		if sibling.Name == department.Name {
-			return nil, fmt.Errorf("Duplicate name on same level: %s", department.Name)
+			return fmt.Errorf("Duplicate name on same level: %s", department.Name)
 		}
 	}
 
-	result, err := s.departmentRepository.CreateDepartment(department)
-	return result, err
+	err := s.departmentRepository.CreateDepartment(department)
+	return err
 }
 
 func (s *departmentService) GetDepartment(id uint, depth int, includeEmployees bool) (*models.Department, error) {
-	root, _ := s.departmentRepository.GetDepartmentById(id)
+
+	if depth < 1 || depth > 5 {
+		return nil, fmt.Errorf("The depth should be between 1 and 5")
+	}
+
+	root, err := s.departmentRepository.GetDepartmentById(id)
+	if err != nil {
+		return nil, err
+	}
 	root.Children = s.buildTree(id, depth, includeEmployees, 0)
 
 	if includeEmployees {
-		root.Employees = s.collectEmployees(root)
+		root.Employees, err = s.employeeRepository.GetEmployeesByDepartment(root.ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return root, nil
 }
@@ -76,15 +98,4 @@ func (s *departmentService) buildTree(parentID uint, depth int, includeEmployees
 		result = append(result, child)
 	}
 	return result
-}
-
-func (s *departmentService) collectEmployees(department *models.Department) []*models.Employee {
-	var allEmployees []*models.Employee
-	allEmployees = append(allEmployees, department.Employees...)
-
-	for _, child := range department.Children {
-		childEmployees := s.collectEmployees(child)
-		allEmployees = append(allEmployees, childEmployees...)
-	}
-	return allEmployees
 }
