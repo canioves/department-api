@@ -11,6 +11,7 @@ type EmployeeRepository interface {
 	CreateEmployee(employee *models.Employee, departmentId uint) error
 	GetEmployeeById(id uint) (*models.Employee, error)
 	GetEmployeesByDepartment(departmentId uint) ([]*models.Employee, error)
+	DeleteEmployees(departmentId uint) error
 }
 
 type employeeRepository struct {
@@ -47,4 +48,10 @@ func (r *employeeRepository) GetEmployeesByDepartment(departmentId uint) ([]*mod
 		return nil, fmt.Errorf("GetEmployeesByDepartment error: %w", err)
 	}
 	return employees, nil
+}
+
+func (r *employeeRepository) DeleteEmployees(departmentId uint) error {
+	var employee *models.Employee
+	result := r.database.Model(employee).Where("department_id = ?", departmentId).Delete(employee)
+	return result.Error
 }

@@ -12,6 +12,7 @@ type DepartmentService interface {
 	CreateDepartment(department *models.Department) error
 	GetDepartment(id uint, depth int, includeEmployees bool) (*models.Department, error)
 	UpdateDepartment(id uint, department *models.Department) (*models.Department, error)
+	DeleteDepartment(id uint, mode string, reassignId uint) error
 }
 
 type departmentService struct {
@@ -160,4 +161,8 @@ func (s *departmentService) UpdateDepartment(id uint, department *models.Departm
 		return nil, err
 	}
 	return existing, nil
+}
+
+func (s *departmentService) DeleteDepartment(id uint, mode string, reassignId uint) error {
+	return s.departmentRepository.DeleteDepartment(id, mode, reassignId)
 }

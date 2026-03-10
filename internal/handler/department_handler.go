@@ -5,6 +5,7 @@ import (
 	"department-api/internal/models"
 	"department-api/internal/service"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -110,10 +111,12 @@ func (h *DepartmentHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	parsed, err := req.ParseHiredAt()
+
 	employee := &models.Employee{
 		FullName: req.FullName,
 		Position: req.Position,
-		HiredAt:  req.HiredAt,
+		HiredAt:  parsed,
 	}
 
 	err = h.employeeService.CreateEmployee(employee, uint(id))
@@ -125,7 +128,8 @@ func (h *DepartmentHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 	response := dto.ToEmployeeResponse(employee)
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -165,4 +169,31 @@ func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Requ
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *DepartmentHandler) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idString := vars["id"]
+
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	mode := r.URL.Query().Get("mode")
+
+	var reassignId int
+	reassignIdString := r.URL.Query().Get("reassign_id")
+
+	if reassignIdString != "" {
+		reassignId, err = strconv.Atoi(reassignIdString)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+	fmt.Println(mode, reassignId)
+	err = h.departmentService.DeleteDepartment(uint(id), mode, uint(reassignId))
+	w.WriteHeader(http.StatusNoContent)
 }

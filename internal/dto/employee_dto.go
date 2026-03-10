@@ -6,9 +6,9 @@ import (
 )
 
 type EmployeeRequest struct {
-	FullName string     `json:"full_name"`
-	Position string     `json:"position"`
-	HiredAt  *time.Time `json:"hired_at,omitempty"`
+	FullName string  `json:"full_name"`
+	Position string  `json:"position"`
+	HiredAt  *string `json:"hired_at,omitempty"`
 }
 
 type EmployeeResponse struct {
@@ -33,4 +33,16 @@ func ToEmployeeResponse(employee *models.Employee) *EmployeeResponse {
 		HiredAt:      employee.HiredAt,
 		CreatedAt:    employee.CreatedAt,
 	}
+}
+
+func (er *EmployeeRequest) ParseHiredAt() (*time.Time, error) {
+	if er.HiredAt == nil {
+		return nil, nil
+	}
+
+	parsedTime, err := time.Parse("2006-01-02", *er.HiredAt)
+	if err != nil {
+		return nil, err
+	}
+	return &parsedTime, nil
 }

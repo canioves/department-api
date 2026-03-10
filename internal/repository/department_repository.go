@@ -14,6 +14,7 @@ type DepartmentRepository interface {
 	GetDepartmentById(id uint) (*models.Department, error)
 	GetSiblingsDepartments(id *uint) ([]*models.Department, error)
 	UpdateDepartment(department *models.Department) error
+	DeleteDepartment(id uint, mode string, reassignID uint) error
 }
 
 type departmentRepository struct {
@@ -78,4 +79,7 @@ func (r *departmentRepository) GetSiblingsDepartments(id *uint) ([]*models.Depar
 
 func (r *departmentRepository) UpdateDepartment(department *models.Department) error {
 	return r.database.Model(department).Select("name", "parent_id").Updates(department).Error
+}
+
+func (r *departmentRepository) DeleteDepartment(id uint, mode string, reassignID uint) error {
 }

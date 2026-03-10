@@ -16,10 +16,10 @@ type UpdateDepartmentRequest struct {
 }
 
 type DepartmentResponse struct {
-	ID        uint   `json:"id"`
-	Name      string `json:"name"`
-	ParentID  *uint  `json:"parent_id,omitempty"`
-	CreatedAt string `json:"created_at"`
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	ParentID  *uint     `json:"parent_id,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func ToDepartmentResponse(department *models.Department) *DepartmentResponse {
@@ -31,6 +31,6 @@ func ToDepartmentResponse(department *models.Department) *DepartmentResponse {
 		ID:        department.ID,
 		Name:      department.Name,
 		ParentID:  department.ParentID,
-		CreatedAt: department.CreatedAt.Format(time.RFC3339),
+		CreatedAt: department.CreatedAt,
 	}
 }

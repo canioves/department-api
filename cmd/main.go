@@ -23,10 +23,11 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/departments/{id}", handler.GetDepartment).Methods("GET")
 	router.HandleFunc("/departments", handler.CreateDepartment).Methods("POST")
-	router.HandleFunc("/departments/{id}/employees", handler.CreateEmployee).Methods("POST")
+	router.HandleFunc("/departments/{id}", handler.GetDepartment).Methods("GET")
 	router.HandleFunc("/departments/{id}", handler.UpdateDepartment).Methods("PATCH")
+	router.HandleFunc("/departments/{id}", handler.DeleteDepartment).Methods("DELETE")
+	router.HandleFunc("/departments/{id}/employees", handler.CreateEmployee).Methods("POST")
 
 	http.ListenAndServe(":"+config.AppPort, router)
 }
