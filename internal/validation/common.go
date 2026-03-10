@@ -7,7 +7,7 @@ import (
 
 func ValidateMaxLength(s string, fieldName string, max int) (bool, error) {
 	if l := utf8.RuneCountInString(s); l > max {
-		return false, fmt.Errorf("%s must not exeed %d characters", fieldName, max)
+		return false, fmt.Errorf("%s must not exceed %d characters", fieldName, max)
 	}
 	return true, nil
 }

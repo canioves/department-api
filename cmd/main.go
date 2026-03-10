@@ -25,8 +25,8 @@ func main() {
 
 	router.HandleFunc("/departments/{id}", handler.GetDepartment).Methods("GET")
 	router.HandleFunc("/departments", handler.CreateDepartment).Methods("POST")
-	router.HandleFunc("/departments/{id}/employee", handler.CreateEmployee).Methods("POST")
+	router.HandleFunc("/departments/{id}/employees", handler.CreateEmployee).Methods("POST")
+	router.HandleFunc("/departments/{id}", handler.UpdateDepartment).Methods("PATCH")
 
-	http.ListenAndServe(":8080", router)
-
+	http.ListenAndServe(":"+config.AppPort, router)
 }

@@ -10,6 +10,11 @@ type CreateDepartmentRequest struct {
 	ParentID *uint  `json:"parent_id"`
 }
 
+type UpdateDepartmentRequest struct {
+	Name     *string `json:"name"`
+	ParentId *uint   `json:"parent_id"`
+}
+
 type DepartmentResponse struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
@@ -17,7 +22,7 @@ type DepartmentResponse struct {
 	CreatedAt string `json:"created_at"`
 }
 
-func ToDepartmentResponce(department *models.Department) *DepartmentResponse {
+func ToDepartmentResponse(department *models.Department) *DepartmentResponse {
 	if department == nil {
 		return nil
 	}

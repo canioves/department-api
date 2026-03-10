@@ -11,6 +11,7 @@ import (
 type DepartmentService interface {
 	CreateDepartment(department *models.Department) error
 	GetDepartment(id uint, depth int, includeEmployees bool) (*models.Department, error)
+	UpdateDepartment(id uint, department *models.Department) (*models.Department, error)
 }
 
 type departmentService struct {
@@ -98,4 +99,65 @@ func (s *departmentService) buildTree(parentID uint, depth int, includeEmployees
 		result = append(result, child)
 	}
 	return result
+}
+
+func (s *departmentService) UpdateDepartment(id uint, department *models.Department) (*models.Department, error) {
+	existing, err := s.departmentRepository.GetDepartmentById(id)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, fmt.Errorf("department not found")
+	}
+
+	if department.Name != "" {
+		trimmedName := strings.Trim(department.Name, " ")
+		if ok, err := validation.ValidateEmpty(trimmedName, "name"); !ok {
+			return nil, err
+		}
+		if ok, err := validation.ValidateMaxLength(trimmedName, "name", 200); !ok {
+			return nil, err
+		}
+		parentID := existing.ParentID
+		if department.ParentID != nil {
+			parentID = department.ParentID
+		}
+		siblings, _ := s.departmentRepository.GetSiblingsDepartments(parentID)
+		for _, sib := range siblings {
+			if sib.ID != existing.ID && sib.Name == trimmedName {
+				return nil, fmt.Errorf("duplicate name on same level: %s", trimmedName)
+			}
+		}
+		existing.Name = trimmedName
+	}
+
+	if department.ParentID != nil {
+		if *department.ParentID == existing.ID {
+			return nil, fmt.Errorf("cannot set department as its own parent")
+		}
+		parentDepartment, err := s.departmentRepository.GetDepartmentById(*department.ParentID)
+		if err != nil {
+			return nil, err
+		}
+		if parentDepartment == nil {
+			return nil, fmt.Errorf("parent department does not exist")
+		}
+		cur := parentDepartment
+		for cur != nil {
+			if cur.ID == existing.ID {
+				return nil, fmt.Errorf("cycle detected")
+			}
+			if cur.ParentID == nil {
+				break
+			}
+			cur, _ = s.departmentRepository.GetDepartmentById(*cur.ParentID)
+		}
+		existing.ParentID = department.ParentID
+	}
+
+	err = s.departmentRepository.UpdateDepartment(existing)
+	if err != nil {
+		return nil, err
+	}
+	return existing, nil
 }

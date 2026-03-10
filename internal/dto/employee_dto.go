@@ -12,23 +12,17 @@ type EmployeeRequest struct {
 }
 
 type EmployeeResponse struct {
-	ID           uint    `json:"id"`
-	DepartmentID uint    `json:"department_id"`
-	FullName     string  `json:"full_name"`
-	Position     string  `json:"position"`
-	HiredAt      *string `json:"hired_at,omitempty"`
-	CreatedAt    string  `json:"created_at"`
+	ID           uint       `json:"id"`
+	DepartmentID uint       `json:"department_id"`
+	FullName     string     `json:"full_name"`
+	Position     string     `json:"position"`
+	HiredAt      *time.Time `json:"hired_at,omitempty"`
+	CreatedAt    time.Time  `json:"created_at"`
 }
 
-func ToEmployeeResponce(employee *models.Employee) *EmployeeResponse {
+func ToEmployeeResponse(employee *models.Employee) *EmployeeResponse {
 	if employee == nil {
 		return nil
-	}
-
-	var hiredAt *string
-	if employee.HiredAt != nil {
-		formatted := employee.HiredAt.Format(time.RFC3339)
-		hiredAt = &formatted
 	}
 
 	return &EmployeeResponse{
@@ -36,7 +30,7 @@ func ToEmployeeResponce(employee *models.Employee) *EmployeeResponse {
 		DepartmentID: employee.DepartmentID,
 		FullName:     employee.FullName,
 		Position:     employee.Position,
-		HiredAt:      hiredAt,
-		CreatedAt:    employee.CreatedAt.Format(time.RFC3339),
+		HiredAt:      employee.HiredAt,
+		CreatedAt:    employee.CreatedAt,
 	}
 }

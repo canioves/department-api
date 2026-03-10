@@ -5,7 +5,6 @@ import (
 	"department-api/internal/models"
 	"department-api/internal/service"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,10 +17,10 @@ type DepartmentHandler struct {
 	employeeService   service.EmployeeService
 }
 
-func NewDepartmentHandler(depService service.DepartmentService, emplSerice service.EmployeeService) *DepartmentHandler {
+func NewDepartmentHandler(depService service.DepartmentService, emplService service.EmployeeService) *DepartmentHandler {
 	return &DepartmentHandler{
 		departmentService: depService,
-		employeeService:   emplSerice,
+		employeeService:   emplService,
 	}
 }
 
@@ -86,7 +85,7 @@ func (h *DepartmentHandler) CreateDepartment(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	response := dto.ToDepartmentResponce(department)
+	response := dto.ToDepartmentResponse(department)
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		log.Println(err)
@@ -98,7 +97,7 @@ func (h *DepartmentHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 
 	vars := mux.Vars(r)
 	idString := vars["id"]
-	fmt.Println(idString)
+
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -107,7 +106,8 @@ func (h *DepartmentHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 
 	var req dto.EmployeeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	employee := &models.Employee{
@@ -117,9 +117,52 @@ func (h *DepartmentHandler) CreateEmployee(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = h.employeeService.CreateEmployee(employee, uint(id))
-	response := dto.ToEmployeeResponce(employee)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := dto.ToEmployeeResponse(employee)
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		log.Println(err)
+	}
+}
+
+func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	idString := vars["id"]
+
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var req dto.UpdateDepartmentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	department := &models.Department{}
+	if req.Name != nil {
+		department.Name = *req.Name
+	}
+	department.ParentID = req.ParentId
+
+	updateDepartment, err := h.departmentService.UpdateDepartment(uint(id), department)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := dto.ToDepartmentResponse(updateDepartment)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(&response); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
