@@ -30,12 +30,12 @@ func NewDepartmentService(depRepo repository.DepartmentRepository, emplRepo repo
 func (s *departmentService) CreateDepartment(department *models.Department) error {
 	if department.ParentID != nil {
 		if *department.ParentID == 0 {
-			return fmt.Errorf("Parent ID cannot be 0")
+			return fmt.Errorf("parent ID cannot be 0")
 		}
 
 		parentDepartment, err := s.departmentRepository.GetDepartmentById(*department.ParentID)
 		if parentDepartment == nil {
-			return fmt.Errorf("Parent department is not exist")
+			return fmt.Errorf("parent department is not exist")
 		}
 		if err != nil {
 			return err
@@ -164,5 +164,43 @@ func (s *departmentService) UpdateDepartment(id uint, department *models.Departm
 }
 
 func (s *departmentService) DeleteDepartment(id uint, mode string, reassignId uint) error {
-	return s.departmentRepository.DeleteDepartment(id, mode, reassignId)
+	switch mode {
+	case "reassign":
+		employees, _ := s.recursiveCollectEmployees(id)
+		for _, empl := range employees {
+			s.employeeRepository.MoveEmployeeToDepartment(empl.ID, reassignId)
+		}
+		return s.departmentRepository.DeleteDepartment(id)
+	case "cascade":
+		s.recursiveDeleteEmployees(id)
+		return s.departmentRepository.DeleteDepartment(id)
+	default:
+		return fmt.Errorf("Mode does not support: %s", mode)
+	}
+}
+
+func (s *departmentService) recursiveDeleteEmployees(id uint) error {
+	children, _ := s.departmentRepository.GetChildrenDepartments(&id)
+	for _, child := range children {
+		if err := s.employeeRepository.DeleteEmployees(child.ID); err != nil {
+			return err
+		}
+		if err := s.recursiveDeleteEmployees(child.ID); err != nil {
+			return err
+		}
+	}
+	return s.employeeRepository.DeleteEmployees(id)
+}
+
+func (s *departmentService) recursiveCollectEmployees(id uint) ([]*models.Employee, error) {
+	var allEmployees []*models.Employee
+	employees, _ := s.employeeRepository.GetEmployeesByDepartment(id)
+	children, _ := s.departmentRepository.GetChildrenDepartments(&id)
+	allEmployees = append(allEmployees, employees...)
+
+	for _, child := range children {
+		childEmployees, _ := s.recursiveCollectEmployees(child.ID)
+		allEmployees = append(allEmployees, childEmployees...)
+	}
+	return allEmployees, nil
 }

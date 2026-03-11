@@ -7,7 +7,6 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func Connect(config *config.Config) *gorm.DB {
@@ -16,7 +15,8 @@ func Connect(config *config.Config) *gorm.DB {
 	)
 
 	pg := postgres.Open(connStr)
-	gormCfg := &gorm.Config{Logger: logger.Default.LogMode(logger.Info)}
+	// gormCfg := &gorm.Config{Logger: logger.Default.LogMode(logger.Info)}
+	gormCfg := &gorm.Config{}
 
 	db, err := gorm.Open(pg, gormCfg)
 	if err != nil {

@@ -12,6 +12,7 @@ type EmployeeRepository interface {
 	GetEmployeeById(id uint) (*models.Employee, error)
 	GetEmployeesByDepartment(departmentId uint) ([]*models.Employee, error)
 	DeleteEmployees(departmentId uint) error
+	MoveEmployeeToDepartment(id uint, departmentId uint) error
 }
 
 type employeeRepository struct {
@@ -52,6 +53,14 @@ func (r *employeeRepository) GetEmployeesByDepartment(departmentId uint) ([]*mod
 
 func (r *employeeRepository) DeleteEmployees(departmentId uint) error {
 	var employee *models.Employee
-	result := r.database.Model(employee).Where("department_id = ?", departmentId).Delete(employee)
-	return result.Error
+	result := r.database.Model(&employee).Where("department_id = ?", departmentId).Delete(&employee)
+	if err := result.Error; err != nil {
+		return fmt.Errorf("DeleteEmployees error: %w", err)
+	}
+	return nil
+}
+
+func (r *employeeRepository) MoveEmployeeToDepartment(id uint, departmentId uint) error {
+	var employee *models.Employee
+	return r.database.Model(&employee).Where("id = ?", id).Update("department_id", departmentId).Error
 }

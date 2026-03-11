@@ -14,7 +14,7 @@ type DepartmentRepository interface {
 	GetDepartmentById(id uint) (*models.Department, error)
 	GetSiblingsDepartments(id *uint) ([]*models.Department, error)
 	UpdateDepartment(department *models.Department) error
-	DeleteDepartment(id uint, mode string, reassignID uint) error
+	DeleteDepartment(id uint) error
 }
 
 type departmentRepository struct {
@@ -72,14 +72,24 @@ func (r *departmentRepository) GetSiblingsDepartments(id *uint) ([]*models.Depar
 
 	result := whereResult.Find(&siblings)
 	if err := result.Error; err != nil {
-		return nil, fmt.Errorf("GetSiblingsDepartments %w", err)
+		return nil, fmt.Errorf("GetSiblingsDepartments error: %w", err)
 	}
 	return siblings, nil
 }
 
 func (r *departmentRepository) UpdateDepartment(department *models.Department) error {
-	return r.database.Model(department).Select("name", "parent_id").Updates(department).Error
+	result := r.database.Model(department).Select("name", "parent_id").Updates(department)
+	if err := result.Error; err != nil {
+		return fmt.Errorf("UpdateDepartment error: %w", err)
+	}
+	return nil
 }
 
-func (r *departmentRepository) DeleteDepartment(id uint, mode string, reassignID uint) error {
+func (r *departmentRepository) DeleteDepartment(id uint) error {
+	var department *models.Department
+	result := r.database.Delete(&department, id)
+	if err := result.Error; err != nil {
+		return fmt.Errorf("DeleteDepartment error: %w", err)
+	}
+	return nil
 }

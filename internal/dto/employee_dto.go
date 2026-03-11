@@ -40,7 +40,7 @@ func (er *EmployeeRequest) ParseHiredAt() (*time.Time, error) {
 		return nil, nil
 	}
 
-	parsedTime, err := time.Parse("2006-01-02", *er.HiredAt)
+	parsedTime, err := time.Parse("02/01/2006", *er.HiredAt)
 	if err != nil {
 		return nil, err
 	}

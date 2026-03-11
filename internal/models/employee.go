@@ -3,11 +3,11 @@ package models
 import "time"
 
 type Employee struct {
-	ID           uint       `gorm:"primaryKey" json:"id"`
-	FullName     string     `json:"full_name"`
-	Position     string     `json:"position"`
-	HiredAt      *time.Time `json:"hired_at"`
-	CreatedAt    time.Time  `gorm:"autoCreateTime" json:"created_at"`
-	DepartmentID uint       `json:"department_id"`
-	Department   Department `gorm:"foreignKey:DepartmentID" json:"department"`
+	ID           uint       `gorm:"primaryKey"`
+	CreatedAt    time.Time  `gorm:"autoCreateTime"`
+	Department   Department `gorm:"foreignKey:DepartmentID"`
+	FullName     string
+	Position     string
+	HiredAt      *time.Time
+	DepartmentID uint
 }

@@ -197,7 +197,7 @@ INSERT INTO "employees" ("full_name", "position", "hired_at", "created_at", "dep
 ('Lauren White', 'Recruiter', '2023-11-14', NOW(), 3);
 
 -- +goose Down
-DELETE FROM "employees" WHERE "department_id" IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39);
-DELETE FROM "departments" WHERE "name" IN ('Engineering', 'Sales', 'Human Resources', 'Backend', 'Frontend', 'QA', 'DevOps', 'Security', 'Infrastructure', 'Core Services', 'API Development', 'Microservices', 'Batch Processing', 'Cloud Infrastructure', 'Container Orchestration', 'Network Team', 'Storage Team', 'Database Team', 'Cache Team', 'Message Queue Team', 'REST API', 'GraphQL Team', 'AWS Team', 'GCP Team', 'PostgreSQL Specialists', 'Query Optimization', 'Backup & Recovery', 'Redis Team', 'Memcached Team', 'Authentication', 'Data Validation', 'PostgreSQL Performance', 'PostgreSQL Security', 'PostgreSQL Monitoring', 'Index Optimization', 'Query Planning', 'Statistics & Analysis', 'Redis Performance', 'Redis Replication');
+DELETE FROM "employees";
+DELETE FROM "departments";
 ALTER SEQUENCE "employees_id_seq" RESTART WITH 1;
 ALTER SEQUENCE "departments_id_seq" RESTART WITH 1;
