@@ -9,7 +9,6 @@ import (
 
 type DepartmentRepository interface {
 	CreateDepartment(department *models.Department) error
-	GetAllDepartments() ([]*models.Department, error)
 	GetChildrenDepartments(parentID *uint) ([]*models.Department, error)
 	GetDepartmentById(id uint) (*models.Department, error)
 	GetSiblingsDepartments(id *uint) ([]*models.Department, error)

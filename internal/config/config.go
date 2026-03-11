@@ -17,18 +17,17 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatalln("Config error:", err)
-	}
-
-	config := Config{}
 	envFlag := os.Getenv("GO_ENV")
+	config := Config{}
 
 	if envFlag == "docker" {
 		config.DBHost = os.Getenv("DB_HOST_DOCKER")
 	} else {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatalln("Config error:", err)
+		}
+
 		config.DBHost = os.Getenv("DB_HOST_LOCAL")
 	}
 

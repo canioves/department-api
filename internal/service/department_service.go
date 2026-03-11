@@ -64,11 +64,6 @@ func (s *departmentService) CreateDepartment(department *models.Department) erro
 }
 
 func (s *departmentService) GetDepartment(id uint, depth int, includeEmployees bool) (*models.Department, error) {
-
-	if depth < 1 || depth > 5 {
-		return nil, fmt.Errorf("The depth should be between 1 and 5")
-	}
-
 	root, err := s.departmentRepository.GetDepartmentById(id)
 	if err != nil {
 		return nil, err
@@ -94,7 +89,11 @@ func (s *departmentService) buildTree(parentID uint, depth int, includeEmployees
 	var result []*models.Department
 	for _, child := range children {
 		if includeEmployees {
-			child.Employees, _ = s.employeeRepository.GetEmployeesByDepartment(child.ID)
+			retrivedEmployees, err := s.employeeRepository.GetEmployeesByDepartment(child.ID)
+			if err != nil {
+				return nil
+			}
+			child.Employees = retrivedEmployees
 		}
 		child.Children = s.buildTree(child.ID, depth, includeEmployees, currentDepth+1)
 		result = append(result, child)
