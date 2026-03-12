@@ -191,12 +191,12 @@ func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Requ
 	}
 
 	response := dto.ToDepartmentResponse(updateDepartment)
-	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(&response); err != nil {
 		http.Error(w, "an error occurred with the response", http.StatusInternalServerError)
 		log.Println(err)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *DepartmentHandler) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
