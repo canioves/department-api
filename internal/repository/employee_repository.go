@@ -44,7 +44,7 @@ func (r *employeeRepository) CreateEmployee(employee *models.Employee, departmen
 
 func (r *employeeRepository) GetEmployeesByDepartment(departmentId uint) ([]*models.Employee, error) {
 	var employees []*models.Employee
-	result := r.database.Where("department_id = ?", departmentId).Find(&employees)
+	result := r.database.Where("department_id = ?", departmentId).Order("created_at, full_name asc").Find(&employees)
 	if err := result.Error; err != nil {
 		return nil, fmt.Errorf("GetEmployeesByDepartment error: %w", err)
 	}

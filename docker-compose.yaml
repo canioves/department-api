@@ -3,9 +3,9 @@ services:
     container_name: department-database-container
     image: postgres:18
     environment:
-      POSTGRES_DB: department-db
-      POSTGRES_USER: canioves
-      POSTGRES_PASSWORD: c23315Ht5
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - postgresdb-data:/var/lib/postgresql/data
