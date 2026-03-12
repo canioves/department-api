@@ -4,9 +4,12 @@ import (
 	"department-api/internal/models"
 	"department-api/internal/repository"
 	"department-api/internal/validation"
+	"errors"
 	"fmt"
 	"strings"
 )
+
+var ErrCycle = errors.New("a cycle detected")
 
 type DepartmentService interface {
 	CreateDepartment(department *models.Department) error
@@ -145,7 +148,7 @@ func (s *departmentService) UpdateDepartment(id uint, department *models.Departm
 		cur := parentDepartment
 		for cur != nil {
 			if cur.ID == existing.ID {
-				return nil, fmt.Errorf("cycle detected")
+				return nil, ErrCycle
 			}
 			if cur.ParentID == nil {
 				break

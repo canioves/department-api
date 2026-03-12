@@ -5,6 +5,7 @@ import (
 	"department-api/internal/models"
 	"department-api/internal/service"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -178,6 +179,11 @@ func (h *DepartmentHandler) UpdateDepartment(w http.ResponseWriter, r *http.Requ
 	department.ParentID = req.ParentId
 
 	updateDepartment, err := h.departmentService.UpdateDepartment(uint(id), department)
+	if errors.Is(err, service.ErrCycle) {
+		http.Error(w, err.Error(), http.StatusConflict)
+		log.Println(err)
+		return
+	}
 	if err != nil {
 		http.Error(w, "an error occurred while updating the department", http.StatusInternalServerError)
 		log.Println(err)
