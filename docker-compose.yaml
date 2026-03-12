@@ -9,6 +9,11 @@ services:
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - postgresdb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -18,7 +23,8 @@ services:
     container_name: department-app-container
     build: .
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       DB_HOST: ${DB_HOST_DOCKER}
       DB_PORT: ${DB_PORT}
